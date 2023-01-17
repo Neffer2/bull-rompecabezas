@@ -1,6 +1,6 @@
 let posibilities = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 let espacio = 15;
-
+let mContext;
 const width = 128; // 4
 const height = 128; // 4 
 // Arreglo que contiene sprites
@@ -19,6 +19,7 @@ class MainScene extends Phaser.Scene {
     }
  
     create(){
+        mContext = this;
         // this.add.image(300, 200, 'background');
         // this.add.sprite(64, 64, 'blocks', 0)
         // this.add.sprite(192, 64, 'blocks', 1)
@@ -43,16 +44,8 @@ class MainScene extends Phaser.Scene {
         /* Shuffle */
             this.shuffleArray(posibilities);
         /* */
-        let positionX = 66;
-        let positionY = 66;
-        posibilities.forEach((element,index) => {
-            if (index > 0 && index % 4 == 0){
-                positionX = 66;
-                positionY+= 130;
-            }
-            blocks.push(this.add.sprite(positionX, positionY, 'blocks', posibilities[index]));
-            positionX += 130;
-        });
+        
+        this.block_print();
 
         // x,y - Width, Height
         const blocks_zone = this.add.zone(0, 0, 1100, 1940);
@@ -101,6 +94,32 @@ class MainScene extends Phaser.Scene {
             // }
         });
         this.add.graphics().lineStyle(2, 0xffff).strokeRectShape(blocks);
+    }
+
+    /* 
+        Imprime el arreglo entregado y rellena blokcks
+        NOTA: setTimeout es asincrona
+        @params array
+    */
+    block_print(){
+        let positionX = 66;
+        let positionY = 66;
+
+        /* Limpia el arreglo si tiene datos */
+        if (blocks.length > 0){
+            blocks = [];
+        }
+
+        posibilities.forEach((element,index) => {
+            setTimeout(() => {
+                if (index > 0 && index % 4 == 0){
+                    positionX = 66;
+                    positionY+= 130;
+                }
+                blocks.push(mContext.add.sprite(positionX, positionY, 'blocks', posibilities[index]));
+                positionX += 130;
+            }, 100 * index);
+        });
     }
 
     /* Obtengo el blqoue pisado
@@ -194,8 +213,15 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    greeting(){
-        console.log("Holas perolas");
+    reordenar(){
+        this.shuffleArray(posibilities);
+        this.block_print();
+    }
+
+    ordenar(){
+        //Ordeno menor a mayor
+        posibilities.sort(function(a, b){return a - b});
+        this.block_print();
     }
 
     doWin(){
@@ -227,10 +253,6 @@ class MainScene extends Phaser.Scene {
             alert('Juego terminado');
         }
     }
-
-    update(){
-
-    }
 }
 
 // Configuracion general
@@ -238,7 +260,7 @@ const config = {
     // Phaser.AUTO, intenta usa WebGL y si el navegador no lo tiene, usa canva.
     type: Phaser.AUTO,
     parent: 'game-container',
-    width: 650,
+    width: 522,
     height: 522,
     scene: [MainScene],
     scale: {
